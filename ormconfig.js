@@ -1,0 +1,20 @@
+module.exports = {
+  name: 'default',
+  type: 'mysql',
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  entities: ['dist/**/*.entity{ .ts,.js}'],
+  synchronize: false,
+  migrations: ['dist/db/migrations/*{.ts,.js}'],
+  migrationsTableName: 'migrations',
+  migrationsRun: false,
+  multipleStatements: true,
+  charset: 'utf8mb4_unicode_ci',
+  logger: process.env.MODE === 'PROD' ? 'file' : 'advanced-console',
+  cli: {
+    migrationsDir: 'src/db/migrations',
+  },
+};

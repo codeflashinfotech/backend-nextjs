@@ -1,0 +1,1 @@
+export const OAUTH2CLIENT = 'OAUTH2CLIENT';

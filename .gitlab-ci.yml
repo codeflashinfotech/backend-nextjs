@@ -1,0 +1,44 @@
+    image: node:14.16.0
+
+    stages:
+      - compile
+      - deploy
+
+    install:
+      image: node:14.16.0
+      stage: compile
+      script:
+        - npm i
+
+    build:
+      image: node:14.16.0
+      stage: compile
+      tags:
+        - docker
+      before_script:
+        - node -v
+      script:
+        - npm install
+        - npm run build
+
+    deploy_prod:
+      image: keymetrics/pm2:4
+      stage: deploy
+      rules:
+        - if: '$CI_COMMIT_BRANCH == "develop"'
+      before_script:
+        - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
+        - eval $(ssh-agent -s)
+        - echo "$SSH_KEY" | tr -d '\r' | ssh-add -
+        - mkdir -p ~/.ssh
+        - chmod 700 ~/.ssh
+      script:
+        - echo "====== Deploy to production server ======"
+        - echo "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+        - chmod 700 ~/.ssh && chmod 600 ~/.ssh/*
+        - echo "Test ssh connection"
+        - ssh -o StrictHostKeyChecking=no -T "$SSH_USERNAME@$SSH_HOST"
+          "sudo bash -ic 'nvm use 10.16.3' && cd /mnt/volume_nyc3_01/pantryon-backend && git pull && npm i && npm run build && sudo bash -ic 'pm2 restart pantryon' && npm run migration:run &&
+          exit"
+      environment:
+        name: deploying
